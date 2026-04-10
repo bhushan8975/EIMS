@@ -10,13 +10,10 @@ import Login from "./pages/Login";
 
 function Layout() {
   const location = useLocation();
-
-  // Hide sidebar on login page
   const hideSidebar = location.pathname === "/login";
 
   return (
     <div style={{ display: "flex", background: "#111", color: "#fff", minHeight: "100vh" }}>
-      
       {!hideSidebar && <Sidebar />}
 
       <div style={{ flex: 1, padding: "20px" }}>
@@ -27,7 +24,6 @@ function Layout() {
           <Route path="/login" element={<Login />} />
         </Routes>
       </div>
-
     </div>
   );
 }
