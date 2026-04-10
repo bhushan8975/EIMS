@@ -1,4 +1,3 @@
-```javascript
 import React from "react";
 
 const ThreatMap = () => {
