@@ -1,6 +1,6 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { api } from "../services/api"; // ✅ use central API
 
 function Login() {
   const navigate = useNavigate();
@@ -11,14 +11,15 @@ function Login() {
   });
 
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // ✅ BONUS
+  const [loading, setLoading] = useState(false);
 
   const login = async () => {
     try {
       setError("");
       setLoading(true);
 
-      const res = await axios.post("http://localhost:5000/login", form);
+      // ✅ FIXED (uses deployed backend)
+      const res = await api.post("/login", form);
 
       localStorage.setItem("token", res.data.token);
 
@@ -51,7 +52,6 @@ function Login() {
       >
         <h2 style={{ marginBottom: "20px" }}>🔐 Login</h2>
 
-        {/* 🔴 ERROR WITH GLOW */}
         {error && (
           <p
             style={{
@@ -81,7 +81,6 @@ function Login() {
           }
         />
 
-        {/* 🚀 BUTTON WITH LOADING */}
         <button
           style={{
             ...btnStyle,
