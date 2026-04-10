@@ -16,13 +16,24 @@ const io = require("socket.io")(server, {
 app.use(cors());
 app.use(express.json());
 
-// 🔐 DEMO USER (you can later move to DB)
+/* =========================
+   ✅ HEALTH CHECK (IMPORTANT)
+========================= */
+app.get("/health", (req, res) => {
+  res.send("OK");
+});
+
+/* =========================
+   🔐 DEMO USER
+========================= */
 const user = {
   username: "bhushan",
-  password: bcrypt.hashSync("123456", 8) // password = 123456
+  password: bcrypt.hashSync("123456", 8)
 };
 
-// 🔐 LOGIN ROUTE
+/* =========================
+   🔐 LOGIN ROUTE
+========================= */
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
@@ -43,12 +54,20 @@ app.post("/login", (req, res) => {
   res.json({ token });
 });
 
-// 🌐 TEST ROUTE
+/* =========================
+   🌐 ROOT ROUTE (FIXED)
+========================= */
 app.get("/", (req, res) => {
-  res.send("Backend Running 🚀");
+  res.status(200).json({
+    status: "OK",
+    message: "EIMS Backend Running 🚀",
+    time: new Date()
+  });
 });
 
-// ⚡ SOCKET
+/* =========================
+   ⚡ SOCKET.IO
+========================= */
 io.on("connection", (socket) => {
   console.log("Client connected");
 
@@ -64,6 +83,9 @@ io.on("connection", (socket) => {
   });
 });
 
+/* =========================
+   🚀 START SERVER
+========================= */
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
