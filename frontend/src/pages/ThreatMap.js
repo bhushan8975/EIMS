@@ -1,35 +1,29 @@
-import { useEffect, useState } from "react";
-import io from "socket.io-client";
-import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
+```javascript
+import React from "react";
 
-function ThreatMap() {
-  const [attacks, setAttacks] = useState([]);
-
-  useEffect(() => {
-    const socket = io("http://localhost:5000");
-
-    socket.on("attack", (data) => {
-      setAttacks(prev => [data, ...prev.slice(0, 20)]);
-    });
-
-    return () => socket.disconnect();
-  }, []);
-
+const ThreatMap = () => {
   return (
-    <ComposableMap>
-      <Geographies geography="https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json">
-        {({ geographies }) =>
-          geographies.map((geo) => <Geography key={geo.rsmKey} geography={geo} />)
-        }
-      </Geographies>
+    <div
+      style={{
+        height: "100vh",
+        backgroundColor: "#0f172a",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        color: "white",
+        flexDirection: "column",
+      }}
+    >
+      <h1 style={{ fontSize: "28px", marginBottom: "10px" }}>
+        🌍 Threat Map
+      </h1>
 
-      {attacks.map((a, i) => (
-        <Marker key={i} coordinates={[a.lng, a.lat]}>
-          <circle r={5} fill="red" />
-        </Marker>
-      ))}
-    </ComposableMap>
+      <p style={{ fontSize: "18px", opacity: 0.7 }}>
+        Map feature coming soon 🚧
+      </p>
+    </div>
   );
-}
+};
 
 export default ThreatMap;
+```
