@@ -1,14 +1,14 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const navigate = useNavigate();
 
-  const [mode, setMode] = useState("login"); // login | register | forgot
+  const [mode, setMode] = useState("login");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     username: "",
@@ -20,28 +20,30 @@ export default function Login() {
 
   const handleSubmit = async () => {
     try {
-      setError("");
       setLoading(true);
 
       if (mode === "login") {
         const res = await axios.post(`${BASE_URL}/login`, form);
+
         localStorage.setItem("token", res.data.token);
+
+        toast.success("Login successful 🚀");
         navigate("/");
       }
 
       if (mode === "register") {
         await axios.post(`${BASE_URL}/register`, form);
+        toast.success("Account created 🎉");
         setMode("login");
-        setError("Account created ✅ Please login");
       }
 
       if (mode === "forgot") {
         await axios.post(`${BASE_URL}/forgot-password`, form);
-        setError("Reset link sent (demo) 📩");
+        toast.info("Reset link sent 📩");
       }
 
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong ❌");
+      toast.error(err.response?.data?.message || "Something went wrong ❌");
     } finally {
       setLoading(false);
     }
@@ -49,6 +51,7 @@ export default function Login() {
 
   return (
     <div style={styles.container}>
+
       {/* LEFT SIDE */}
       <div style={styles.left}>
         <h1 style={styles.logo}>⚡ EIMS</h1>
@@ -67,9 +70,6 @@ export default function Login() {
             {mode === "forgot" && "Reset Password 🔐"}
           </h2>
 
-          {error && <p style={styles.error}>{error}</p>}
-
-          {/* EMAIL (register/forgot) */}
           {(mode !== "login") && (
             <input
               placeholder="Email"
@@ -80,7 +80,6 @@ export default function Login() {
             />
           )}
 
-          {/* USERNAME */}
           {mode !== "forgot" && (
             <input
               placeholder="Username"
@@ -91,7 +90,6 @@ export default function Login() {
             />
           )}
 
-          {/* PASSWORD */}
           {mode !== "forgot" && (
             <div style={{ position: "relative" }}>
               <input
@@ -122,7 +120,6 @@ export default function Login() {
             {loading ? "Processing..." : "Continue"}
           </button>
 
-          {/* SWITCH LINKS */}
           <div style={styles.links}>
             {mode === "login" && (
               <>
@@ -154,7 +151,7 @@ const styles = {
   container: {
     display: "flex",
     height: "100vh",
-    background: "linear-gradient(135deg, #020617, #0f172a)"
+    background: "radial-gradient(circle at 20% 20%, #0ea5e9, #020617)"
   },
 
   left: {
@@ -208,8 +205,7 @@ const styles = {
     borderRadius: "8px",
     border: "1px solid #334155",
     background: "#020617",
-    color: "#fff",
-    outline: "none"
+    color: "#fff"
   },
 
   button: {
@@ -220,8 +216,7 @@ const styles = {
     background: "linear-gradient(90deg, #22c55e, #4ade80)",
     color: "#000",
     fontWeight: "bold",
-    cursor: "pointer",
-    transition: "0.3s"
+    cursor: "pointer"
   },
 
   links: {
@@ -231,11 +226,6 @@ const styles = {
     fontSize: "13px",
     color: "#38bdf8",
     cursor: "pointer"
-  },
-
-  error: {
-    color: "#ff4d4f",
-    marginBottom: "10px"
   },
 
   eye: {
