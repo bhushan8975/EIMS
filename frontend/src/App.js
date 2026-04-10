@@ -7,6 +7,8 @@ import Alerts from "./pages/Alerts";
 import ThreatMap from "./pages/ThreatMap";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Layout() {
   const location = useLocation();

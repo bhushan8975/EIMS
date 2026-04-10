@@ -1,32 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { api } from "../services/api";
+import { Pie, Bar } from "react-chartjs-2";
+import { Chart, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from "chart.js";
 import { io } from "socket.io-client";
+import { api, BASE_URL } from "../services/api";
+import { toast } from "react-toastify";
 
-const SOCKET_URL = "https://eims-backend.onrender.com";
+Chart.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-function Dashboard() {
-  const [stats, setStats] = useState({
-    total: 0,
-    high: 0,
-    medium: 0,
-    low: 0,
-  });
+const socket = io(BASE_URL, {
+  transports: ["websocket"],
+});
 
-  const [loading, setLoading] = useState(true);
+export default function Dashboard() {
+  const [alerts, setAlerts] = useState([]);
 
   useEffect(() => {
     fetchAlerts();
 
-    const socket = io(SOCKET_URL, {
-      transports: ["websocket"],
-    });
-
     socket.on("connect", () => {
-      console.log("✅ Socket connected");
+      console.log("✅ Connected to backend socket");
     });
 
     socket.on("newAlert", (data) => {
-      processData(data);
+      toast.info("🚨 New Threat Detected!");
+      setAlerts(data);
     });
 
     return () => socket.disconnect();
@@ -35,92 +32,60 @@ function Dashboard() {
   const fetchAlerts = async () => {
     try {
       const res = await api.get("/alerts");
-      processData(res.data);
-      setLoading(false);
+      setAlerts(res.data);
     } catch (err) {
-      console.error("Error:", err);
-      setLoading(false);
+      console.error(err);
     }
   };
 
-  const processData = (data) => {
-    const counts = {
-      total: data.length,
-      high: 0,
-      medium: 0,
-      low: 0,
-    };
+  const count = (type) => alerts.filter(a => a.severity === type).length;
 
-    data.forEach((item) => {
-      if (item.severity === "high") counts.high++;
-      else if (item.severity === "medium") counts.medium++;
-      else counts.low++;
-    });
+  const data = {
+    labels: ["High", "Medium", "Low"],
+    datasets: [{
+      data: [count("high"), count("medium"), count("low")],
+      backgroundColor: ["#ff4d4f", "#faad14", "#52c41a"],
+    }]
+  };
 
-    setStats(counts);
+  const barData = {
+    labels: ["High", "Medium", "Low"],
+    datasets: [{
+      label: "Threat Count",
+      data: [count("high"), count("medium"), count("low")],
+      backgroundColor: ["#ff4d4f", "#faad14", "#52c41a"],
+    }]
   };
 
   return (
     <div>
-      <h1 style={{ marginBottom: "20px" }}>📊 Dashboard</h1>
+      <h1 style={{ fontSize: "28px" }}>📊 Dashboard</h1>
 
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <>
-          <div style={styles.grid}>
-            <Card title="Total" value={stats.total} color="#00d4ff" />
-            <Card title="High" value={stats.high} color="#ff3b3b" />
-            <Card title="Medium" value={stats.medium} color="#ffaa00" />
-            <Card title="Low" value={stats.low} color="#00c853" />
+      <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
+        {["total","high","medium","low"].map(type => (
+          <div key={type} style={{
+            flex: 1,
+            background: "#1a1a1a",
+            padding: "20px",
+            borderRadius: "10px"
+          }}>
+            <h3>{type.toUpperCase()}</h3>
+            <h2>
+              {type === "total" ? alerts.length : count(type)}
+            </h2>
           </div>
+        ))}
+      </div>
 
-          <div style={styles.chartBox}>
-            <h3>Threat Distribution</h3>
-            <div style={styles.legend}>
-              <span style={{ color: "#ff3b3b" }}>■ High</span>
-              <span style={{ color: "#ffaa00" }}>■ Medium</span>
-              <span style={{ color: "#00c853" }}>■ Low</span>
-            </div>
-          </div>
-        </>
-      )}
+      <div style={{ display: "flex", marginTop: "40px", gap: "40px" }}>
+        <div style={{ width: "300px" }}>
+          <Pie data={data} />
+        </div>
+
+        <div style={{ width: "400px" }}>
+          <Bar data={barData} />
+        </div>
+      </div>
     </div>
   );
 }
-
-function Card({ title, value, color }) {
-  return (
-    <div style={{ ...styles.card, borderLeft: `5px solid ${color}` }}>
-      <h3>{title}</h3>
-      <p style={{ fontSize: "24px" }}>{value}</p>
-    </div>
-  );
-}
-
-const styles = {
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "20px",
-  },
-  card: {
-    background: "#1c1c1c",
-    padding: "20px",
-    borderRadius: "10px",
-    color: "#fff",
-  },
-  chartBox: {
-    marginTop: "30px",
-    background: "#1c1c1c",
-    padding: "20px",
-    borderRadius: "10px",
-    color: "#fff",
-  },
-  legend: {
-    display: "flex",
-    gap: "20px",
-  },
-};
-
-export default Dashboard;
