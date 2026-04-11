@@ -23,7 +23,10 @@ export default function Login() {
       setLoading(true);
 
       if (mode === "login") {
-        const res = await axios.post(`${BASE_URL}/login`, form);
+        const res = await axios.post(`${BASE_URL}/login`, {
+          username: form.username,
+          password: form.password
+        });
 
         localStorage.setItem("token", res.data.token);
 
@@ -32,13 +35,21 @@ export default function Login() {
       }
 
       if (mode === "register") {
-        await axios.post(`${BASE_URL}/register`, form);
+        await axios.post(`${BASE_URL}/register`, {
+          username: form.username,
+          password: form.password,
+          email: form.email
+        });
+
         toast.success("Account created 🎉");
         setMode("login");
       }
 
       if (mode === "forgot") {
-        await axios.post(`${BASE_URL}/forgot-password`, form);
+        await axios.post(`${BASE_URL}/forgot-password`, {
+          email: form.email
+        });
+
         toast.info("Reset link sent 📩");
       }
 
